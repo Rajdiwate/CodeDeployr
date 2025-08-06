@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🐶 Husky pre-commit hook triggered."
+echo "🔍 Running lint to check code quality..."
+
+bun run lint 
+
+echo "🧪 Running prettier check"
+bun run format
+
+echo "🧪 Running type check"
+bun run check-types
+
+echo "Checking build success"
+bun run build
+
+echo "✅ Pre-commit All checks passed!"
+echo "🚀 You're ready to commit clean, quality code!"
+echo ""
+

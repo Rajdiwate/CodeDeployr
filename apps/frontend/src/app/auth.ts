@@ -1,6 +1,7 @@
 import { client as prisma } from "@deployer/db";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { Session, User, SessionStrategy, Account, Profile } from "next-auth";
+import { JWT } from "next-auth/jwt";
 import Github from "next-auth/providers/github";
 
 export const authOptions = {
@@ -10,9 +11,21 @@ export const authOptions = {
     Github({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
+      authorization: {
+        params: {
+          scope: "repo read:user user:email"
+        }
+      }
     }),
   ],
   callbacks: {
+    // async jwt({token,account,user}:{token:JWT & {accessToken?:string}, account?:Account |null,user:User}){
+    //   if(account && user){
+    //     token.accessToken=account.access_token;
+    //     token.id=user.id;
+    //   }
+    //   return token
+    // },
     session({ session, user }: { session: Session; user: User }) {
       if (session.user) {
         session.user.id = user.id;
@@ -32,31 +45,43 @@ export const authOptions = {
         email?: string;
       };
       credentials?: Record<string, unknown>;
-    }) {
-      // Check if an account already exists for this email
-      if (account?.provider === "github" && user.email) {
-        const existingUser = await prisma.user.findUnique({
-          where: { email: user.email },
+     }) {
+      if (!account || account.provider !== "github" || !user.email) {
+        return true; 
+      }
+
+      const existingUser = await prisma.user.findUnique({
+        where: { email: user.email },
+      });
+
+      if (existingUser) {
+        const existingAccount = await prisma.account.findUnique({
+          where: {
+            provider_providerAccountId: {
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+            },
+          },
         });
 
-        if (existingUser) {
-          // Link GitHub account to existing user
-          await prisma.account.update({
-            where: {
-              provider_providerAccountId: {
-                provider: account.provider,
-                providerAccountId: account.providerAccountId,
-              },
-            },
+        if (!existingAccount) {
+          await prisma.account.create({
             data: {
               userId: existingUser.id,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              access_token: account.access_token,
+              token_type: account.token_type,
+              scope: account.scope,
             },
           });
         }
       }
 
       return true;
-    },
+    }
+
   },
   // pages: {
   //   signIn: "/signin", // Optional custom signin page

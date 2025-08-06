@@ -7,7 +7,7 @@
         "prettier": "^3.6.2",
         "turbo": "^2.5.5",
         "typescript": "5.8.3",
-      },
+      }
     },
     "apps/frontend": {
       "name": "frontend",
@@ -43,11 +43,11 @@
     "packages/db": {
       "name": "@deployer/db",
       "dependencies": {
-        "@prisma/client": "^6.13.0",
-        "prisma": "^6.13.0",
+        "@prisma/client": "6.13.0",
       },
       "devDependencies": {
         "@types/bun": "latest",
+        "prisma": "^6.13.0",
       },
       "peerDependencies": {
         "typescript": "^5",

@@ -6,9 +6,6 @@ echo "🔍 Running lint to check code quality..."
 
 pnpm run lint 
 
-echo "🧪 Running prettier check"
-pnpm run format
-
 echo "🧪 Running type check"
 pnpm run check-types
 

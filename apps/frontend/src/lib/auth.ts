@@ -1,6 +1,7 @@
 import { client as prisma } from "@deployer/db";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { Session, User, SessionStrategy, Account, Profile } from "next-auth";
+import { JWT } from "next-auth/jwt";
 import Github from "next-auth/providers/github";
 
 export const authOptions = {
@@ -10,15 +11,35 @@ export const authOptions = {
     Github({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
+      authorization: { params: { scope: "read:user repo user:email" } },
     }),
   ],
   callbacks: {
-    session({ session, user }: { session: Session; user: User }) {
-      if (session.user) {
-        session.user.id = user.id;
+    async jwt({
+      token,
+      account,
+      user
+    }: {
+      token: JWT & { accessToken?: string };
+      account?: Account | null;
+      user:User
+    }) {
+      if (account?.access_token) {
+        token.accessToken = account.access_token;
+        token.id=user.id;
       }
-      return session;
+      return token;
     },
+    async session({ session, token }:{session:Session; token:JWT}) {
+    return {
+      ...session,
+      user: {
+        ...session.user,
+        id: token.id,
+      },
+      accessToken: token.accessToken,
+    };
+  },
 
     async signIn({
       user,
@@ -53,6 +74,8 @@ export const authOptions = {
             },
           });
         }
+
+        
       }
 
       return true;
@@ -63,7 +86,7 @@ export const authOptions = {
   // },
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: "database" as SessionStrategy,
+    strategy: "jwt" as SessionStrategy,
     maxAge: 7 * 24 * 60 * 60, // 7 days
   },
 };

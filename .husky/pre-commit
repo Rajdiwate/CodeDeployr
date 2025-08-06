@@ -4,16 +4,16 @@
 echo "🐶 Husky pre-commit hook triggered."
 echo "🔍 Running lint to check code quality..."
 
-bun run lint 
+pnpm run lint 
 
 echo "🧪 Running prettier check"
-bun run format
+pnpm run format
 
 echo "🧪 Running type check"
-bun run check-types
+pnpm run check-types
 
 echo "Checking build success"
-bun run build
+pnpm run build
 
 echo "✅ Pre-commit All checks passed!"
 echo "🚀 You're ready to commit clean, quality code!"

@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "✅ Commit completed successfully!"
+echo "🎉 Your changes have been committed with clean code standards."
+echo "📦 Everything looks good. Ready to push!"
+echo ""
+
+

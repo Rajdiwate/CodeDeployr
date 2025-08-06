@@ -7,49 +7,33 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
+// Existing NextAuth tables (you already have these)
 model Account {
-  userId                   String
-  type                     String
-  provider                 String
-  providerAccountId        String
-  refresh_token            String?
-  access_token             String?
-  expires_at               Int?
-  refresh_token_expires_in Int?
-  token_type               String?
-  scope                    String?
-  id_token                 String?
-  session_state            String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
+  id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model VerificationToken {
@@ -58,4 +42,313 @@ model VerificationToken {
   expires    DateTime
 
   @@id([identifier, token])
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  githubId       String?   @unique
+  githubUsername String?
+  accounts       Account[]
+  sessions       Session[]
+
+  // CodeDeployr specific fields
+  projects  Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// Core CodeDeployr Tables
+
+model Project {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  // GitHub Integration
+  githubRepoUrl   String
+  githubRepoName  String // e.g., "username/repo-name"
+  githubBranch    String  @default("main")
+  githubWebhookId String? // GitHub webhook ID for auto-deploy
+
+  // Project Configuration
+  projectType     ProjectType
+  framework       Framework?
+  buildCommand    String?
+  outputDirectory String?
+  installCommand  String?     @default("npm install")
+  startCommand    String? // For backend projects
+
+  // Environment Variables
+  envVariables EnvVariable[]
+
+  // Deployment Configuration
+  subdomain    String  @unique // e.g., "my-app" for my-app.codedeployr.io
+  customDomain String? // Optional custom domain
+
+  // S3 Storage Paths
+  sourceCodePath     String? // S3 path where source code is stored
+  buildArtifactsPath String? // S3 path for build outputs
+  s3Objects          S3Object[]
+
+  // Relationships
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deployments Deployment[]
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([subdomain])
+}
+
+model EnvVariable {
+  id       String  @id @default(cuid())
+  key      String
+  value    String  @db.Text
+  isSecret Boolean @default(false)
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, key])
+}
+
+model Deployment {
+  id String @id @default(cuid())
+
+  // Deployment Metadata
+  version       String // e.g., "v1.2.3" or commit hash
+  commitHash    String
+  commitMessage String?
+  branch        String
+
+  // Deployment Status
+  status         DeploymentStatus @default(PENDING)
+  deploymentType DeploymentType   @default(MANUAL)
+
+  // Build Information
+  buildStartedAt   DateTime?
+  buildCompletedAt DateTime?
+  buildDuration    Int? // Duration in seconds
+
+  // S3 Storage
+  sourceCodeS3Key     String? // S3 key for source code zip
+  buildLogsS3Key      String? // S3 key for build logs
+  buildArtifactsS3Key String? // S3 key for build artifacts
+
+  // Docker Information (for backend projects)
+  dockerImageTag  String? // Docker Hub image tag
+  dockerImageUrl  String? // Full Docker image URL
+  dockerBuildLogs String? @db.Text
+
+  // Kubernetes Deployment Info
+  k8sDeploymentName   String? // K8s deployment name
+  k8sServiceName      String? // K8s service name
+  k8sIngressName      String? // K8s ingress name
+  k8sNamespace        String? // K8s namespace
+  k8sPodStatus        PodStatus? // Current pod status
+  kubernetesResources KubernetesResource[] // Kubernetes resources
+
+  // Resource Usage
+  memoryLimit  String? // e.g., "512Mi"
+  cpuLimit     String? // e.g., "500m"
+  replicaCount Int?    @default(1)
+
+  // URLs and Access
+  deploymentUrl String? // Full URL where app is accessible
+  previewUrl    String? // Preview URL if different
+
+  // Error Information
+  errorMessage String? @db.Text
+  errorLogs    String? @db.Text
+
+  // Relationships
+  projectId String
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  buildLogs BuildLog[]
+
+  // Metadata
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  S3Object  S3Object[]
+
+  @@index([projectId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model BuildLog {
+  id String @id @default(cuid())
+
+  // Log Content
+  message   String    @db.Text
+  level     LogLevel  @default(INFO)
+  timestamp DateTime  @default(now())
+  source    LogSource @default(BUILD)
+
+  // Optional structured data
+  metadata Json? // Additional context as JSON
+
+  // S3 Storage (for large logs)
+  s3Key String? // S3 key if log is stored in S3
+
+  // Relationships
+  deploymentId String
+  deployment   Deployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+
+  @@index([deploymentId])
+  @@index([timestamp])
+}
+
+// Additional Models for System Management
+
+model KubernetesResource {
+  id String @id @default(cuid())
+
+  // Resource Identification
+  name         String
+  namespace    String
+  resourceType K8sResourceType
+
+  // Resource Configuration
+  manifest    Json // K8s manifest as JSON
+  labels      Json? // K8s labels
+  annotations Json? // K8s annotations
+
+  // Status
+  status String
+  phase  String?
+
+  // Relationships
+  deploymentId String?
+  deployment   Deployment? @relation(fields: [deploymentId], references: [id], onDelete: SetNull)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, namespace, resourceType])
+  @@index([deploymentId])
+}
+
+model S3Object {
+  id String @id @default(cuid())
+
+  // S3 Information
+  bucket      String
+  key         String
+  size        Int? // Size in bytes
+  contentType String?
+  etag        String?
+
+  // Classification
+  objectType S3ObjectType
+
+  // Relationships
+  projectId    String?
+  project      Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  deploymentId String?
+  deployment   Deployment? @relation(fields: [deploymentId], references: [id], onDelete: SetNull)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([bucket, key])
+  @@index([projectId])
+  @@index([deploymentId])
+}
+
+// Enums
+
+enum ProjectType {
+  FRONTEND
+  BACKEND
+  FULLSTACK
+  STATIC
+}
+
+enum Framework {
+  NEXTJS
+  REACT
+  VUE
+  ANGULAR
+  SVELTE
+  NODEJS
+  EXPRESS
+  FASTIFY
+  PYTHON
+  DJANGO
+  FLASK
+  STATIC_HTML
+  GATSBY
+  NUXT
+}
+
+enum DeploymentStatus {
+  PENDING
+  CLONING
+  BUILDING
+  PUSHING
+  DEPLOYING
+  DEPLOYED
+  FAILED
+  CANCELLED
+}
+
+enum DeploymentType {
+  MANUAL
+  AUTO_GITHUB_PUSH
+  AUTO_GITHUB_PR
+}
+
+enum PodStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  UNKNOWN
+  TERMINATING
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  FATAL
+}
+
+enum LogSource {
+  BUILD
+  DEPLOY
+  RUNTIME
+  SYSTEM
+}
+
+enum K8sResourceType {
+  DEPLOYMENT
+  SERVICE
+  INGRESS
+  POD
+  CONFIGMAP
+  SECRET
+  PVC
+}
+
+enum S3ObjectType {
+  SOURCE_CODE
+  BUILD_ARTIFACTS
+  BUILD_LOGS
+  DOCKER_BUILD_CONTEXT
+  BACKUP
 }

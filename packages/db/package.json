@@ -3,22 +3,17 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
-  "exports": {
-    ".": "./index.ts"
-  },
-  "scripts": {
-    "studio":"prisma studio",
-    "migrate":"prisma migrate dev",
-    "generate":"prisma generate"
+  "exports" : {
+    "." : "./index.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "prisma": "^6.13.0"
+    "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
-    "@prisma/client": "6.13.0"
+    "@prisma/client": "^6.13.0",
+    "prisma": "^6.13.0"
   }
 }

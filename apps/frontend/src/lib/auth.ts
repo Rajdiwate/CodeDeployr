@@ -31,7 +31,7 @@ export const authOptions = {
       }
       return token;
     },
-    async session({ session, token }:{session:Session; token:JW}) {
+    async session({ session, token }:{session:Session; token:JWT}) {
     return {
       ...session,
       user: {

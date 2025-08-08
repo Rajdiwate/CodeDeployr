@@ -1,0 +1,11 @@
+{
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "editor.formatOnSave": true,
+  "editor.fontSize": 16,
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 0
+}

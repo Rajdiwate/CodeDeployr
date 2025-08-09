@@ -109,11 +109,8 @@ importers:
   packages/db:
     dependencies:
       '@prisma/client':
-        specifier: ^6.13.0
+        specifier: 6.13.0
         version: 6.13.0(prisma@6.13.0(typescript@5.8.3))(typescript@5.8.3)
-      prisma:
-        specifier: ^6.13.0
-        version: 6.13.0(typescript@5.8.3)
       typescript:
         specifier: ^5
         version: 5.8.3
@@ -121,6 +118,9 @@ importers:
       '@types/bun':
         specifier: latest
         version: 1.2.19(@types/react@19.1.0)
+      prisma:
+        specifier: ^6.13.0
+        version: 6.13.0(typescript@5.8.3)
 
   packages/eslint-config:
     devDependencies:

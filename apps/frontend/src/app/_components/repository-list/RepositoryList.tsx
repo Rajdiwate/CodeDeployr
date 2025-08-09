@@ -26,20 +26,22 @@ export function RepositoryList({ repos }: { repos: Repo[] }) {
   const [filteredRepos, setFilteredRepos] = useState(repositories);
 
   useEffect(() => {
-    const cleanedRepos = repos.map((repo) => ({
-      id: repo.id,
-      name: repo.name,
-      description: repo.description,
-      language: repo.language,
-      stargazers_count: repo.stargazers_count,
-      forks: repo.forks,
-      updated_at: repo.updated_at,
-      private: repo.private,
-      default_branch: repo.default_branch,
-    }));
+    if (repositories.length !== repos.length) {
+      const cleanedRepos = repos.map((repo) => ({
+        id: repo.id,
+        name: repo.name,
+        description: repo.description,
+        language: repo.language,
+        stargazers_count: repo.stargazers_count,
+        forks: repo.forks,
+        updated_at: repo.updated_at,
+        private: repo.private,
+        default_branch: repo.default_branch,
+      }));
 
-    dispatch(setRepositories(cleanedRepos));
-  }, [repos, dispatch]);
+      dispatch(setRepositories(cleanedRepos));
+    }
+  }, [repos, dispatch, repositories]);
 
   useEffect(() => {
     const filtered = repositories.filter((repo) =>

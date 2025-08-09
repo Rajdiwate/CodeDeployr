@@ -18,28 +18,28 @@ export const authOptions = {
     async jwt({
       token,
       account,
-      user
+      user,
     }: {
       token: JWT & { accessToken?: string };
       account?: Account | null;
-      user:User
+      user: User;
     }) {
       if (account?.access_token) {
         token.accessToken = account.access_token;
-        token.id=user.id;
+        token.id = user.id;
       }
       return token;
     },
-    async session({ session, token }:{session:Session; token:JWT}) {
-    return {
-      ...session,
-      user: {
-        ...session.user,
-        id: token.id,
-      },
-      accessToken: token.accessToken,
-    };
-  },
+    async session({ session, token }: { session: Session; token: JWT }) {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id,
+        },
+        accessToken: token.accessToken,
+      };
+    },
 
     async signIn({
       user,
@@ -74,16 +74,14 @@ export const authOptions = {
             },
           });
         }
-
-        
       }
 
       return true;
     },
   },
-  // pages: {
-  //   signIn: "/signin", // Optional custom signin page
-  // },
+  pages: {
+    signIn: "/signin",
+  },
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt" as SessionStrategy,

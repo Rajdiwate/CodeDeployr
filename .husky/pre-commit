@@ -9,6 +9,9 @@ pnpm run lint
 echo "🧪 Running type check"
 pnpm run check-types
 
+echo "Runnin format check"
+pnpm run format:check
+
 echo "Checking build success"
 pnpm run build
 

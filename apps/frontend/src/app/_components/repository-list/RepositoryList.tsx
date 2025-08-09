@@ -18,36 +18,34 @@ const languageColors: Record<string, string> = {
   Dart: "bg-blue-300/70",
 };
 
-export function RepositoryList({repos}: {repos: Repo[]}) {
-console.log(repos)
-  const dispatch=useAppDispatch();
+export function RepositoryList({ repos }: { repos: Repo[] }) {
+  console.log(repos);
+  const dispatch = useAppDispatch();
   const { repositories, searchString } = useAppSelector((state) => state.repo);
 
   const [filteredRepos, setFilteredRepos] = useState(repositories);
 
-  useEffect(()=>{
-    const cleanedRepos=repos.map((repo)=>({
-      id:repo.id,
-      name:repo.name,
-      description:repo.description,
-      language:repo.language,
-      stargazers_count:repo.stargazers_count,
-      forks:repo.forks,
-      updated_at:repo.updated_at,
-      private:repo.private,
-      default_branch:repo.default_branch
+  useEffect(() => {
+    const cleanedRepos = repos.map((repo) => ({
+      id: repo.id,
+      name: repo.name,
+      description: repo.description,
+      language: repo.language,
+      stargazers_count: repo.stargazers_count,
+      forks: repo.forks,
+      updated_at: repo.updated_at,
+      private: repo.private,
+      default_branch: repo.default_branch,
+    }));
 
-    }))
-
-    dispatch(setRepositories(cleanedRepos))
-  },[repos,dispatch])
+    dispatch(setRepositories(cleanedRepos));
+  }, [repos, dispatch]);
 
   useEffect(() => {
-    const filtered = repositories.filter(
-      (repo) =>
-        `${repo.name} ${repo.description}`
+    const filtered = repositories.filter((repo) =>
+      `${repo.name} ${repo.description}`
         .toLowerCase()
-        .includes(searchString.toLowerCase())
+        .includes(searchString.toLowerCase()),
     );
     setFilteredRepos(filtered);
   }, [repositories, searchString]);

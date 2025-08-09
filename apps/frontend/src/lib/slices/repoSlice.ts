@@ -10,6 +10,8 @@ export type Repo = {
   updated_at: string;
   private: boolean;
   default_branch: string;
+  clone_url: string;
+  html_url: string;
 };
 
 const initialState: { repositories: Repo[]; searchString: string } = {

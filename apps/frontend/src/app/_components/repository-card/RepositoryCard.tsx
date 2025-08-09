@@ -73,14 +73,16 @@ export function RepositoryCard({ repo, languageColors }: IRepositoryProps) {
             <GitBranch className="w-4 h-4 mr-1" />
             {repo.default_branch}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-500 hover:text-gray-300 hover:bg-gray-800/50"
-          >
-            <ExternalLink className="w-4 h-4 mr-1" />
-            View on GitHub
-          </Button>
+          <a href={repo.html_url} target="_blank">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-500 hover:text-gray-300 hover:bg-gray-800/50"
+            >
+              <ExternalLink className="w-4 h-4 mr-1" />
+              View on GitHub
+            </Button>
+          </a>
         </div>
       </CardContent>
     </Card>

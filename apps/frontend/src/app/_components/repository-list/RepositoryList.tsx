@@ -27,7 +27,7 @@ export function RepositoryList({ repos }: { repos: Repo[] }) {
 
   useEffect(() => {
     if (repositories.length !== repos.length) {
-      const cleanedRepos = repos.map((repo) => ({
+      const cleanedRepos: Repo[] = repos.map((repo) => ({
         id: repo.id,
         name: repo.name,
         description: repo.description,
@@ -37,6 +37,8 @@ export function RepositoryList({ repos }: { repos: Repo[] }) {
         updated_at: repo.updated_at,
         private: repo.private,
         default_branch: repo.default_branch,
+        clone_url: repo.clone_url,
+        html_url: repo.html_url,
       }));
 
       dispatch(setRepositories(cleanedRepos));

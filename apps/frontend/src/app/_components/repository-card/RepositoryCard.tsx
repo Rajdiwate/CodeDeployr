@@ -55,7 +55,7 @@ export function RepositoryCard({ repo, languageColors }: IRepositoryProps) {
             </div>
             <div className="flex items-center text-gray-500">
               <Star className="w-4 h-4 mr-1" />
-              {repo.stars}
+              {repo.stargazers_count}
             </div>
             <div className="flex items-center text-gray-500">
               <GitFork className="w-4 h-4 mr-1" />
@@ -64,14 +64,14 @@ export function RepositoryCard({ repo, languageColors }: IRepositoryProps) {
           </div>
           <div className="flex items-center text-gray-500">
             <Calendar className="w-4 h-4 mr-1" />
-            {formatDate(repo.updatedAt)}
+            {formatDate(repo.updated_at)}
           </div>
         </div>
         <Separator className="my-3 bg-gray-800/50" />
         <div className="flex items-center justify-between">
           <div className="flex items-center text-sm text-gray-500">
             <GitBranch className="w-4 h-4 mr-1" />
-            {repo.defaultBranch}
+            {repo.default_branch}
           </div>
           <Button
             variant="ghost"

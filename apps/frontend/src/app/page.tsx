@@ -5,6 +5,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Header } from "./_components/header/Header";
+import { setRepositories } from "@/lib/slices/repoSlice";
+import axios from "axios";
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
@@ -12,6 +14,13 @@ export default async function HomePage() {
   if (!session || !session.user || !session.user.id) {
     redirect("/api/auth/signin");
   }
+
+  const token=session.accessToken;
+  const {data:repos}=await axios.get('https://api.github.com/user/repos',{
+    headers:{
+      Authorization:`Bearer ${token}`
+    }
+  }) 
 
   return (
     <div className="min-h-screen bg-black ">
@@ -38,7 +47,7 @@ export default async function HomePage() {
           <SearchRepo />
 
           {/* Repository List */}
-          <RepositoryList />
+          <RepositoryList repos={repos} />
         </div>
       </main>
     </div>

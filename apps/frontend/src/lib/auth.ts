@@ -24,7 +24,6 @@ export const authOptions = {
       account?: Account | null;
       user:User
     }) {
-      // Save access_token in JWT on initial sign-in
       if (account?.access_token) {
         token.accessToken = account.access_token;
         token.id=user.id;

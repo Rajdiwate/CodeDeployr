@@ -5,7 +5,8 @@ import { RepositoryCard } from "../repository-card/RepositoryCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Repo } from "@/lib/slices/repoSlice";
-import { useAppSelector } from "@/hooks/redux";
+import { setRepositories } from "@/lib/slices/repoSlice";
+import { useAppSelector, useAppDispatch } from "@/hooks/redux";
 import { useEffect, useState } from "react";
 
 const languageColors: Record<string, string> = {
@@ -17,16 +18,36 @@ const languageColors: Record<string, string> = {
   Dart: "bg-blue-300/70",
 };
 
-export function RepositoryList() {
+export function RepositoryList({repos}: {repos: Repo[]}) {
+console.log(repos)
+  const dispatch=useAppDispatch();
   const { repositories, searchString } = useAppSelector((state) => state.repo);
 
   const [filteredRepos, setFilteredRepos] = useState(repositories);
 
+  useEffect(()=>{
+    const cleanedRepos=repos.map((repo)=>({
+      id:repo.id,
+      name:repo.name,
+      description:repo.description,
+      language:repo.language,
+      stargazers_count:repo.stargazers_count,
+      forks:repo.forks,
+      updated_at:repo.updated_at,
+      private:repo.private,
+      default_branch:repo.default_branch
+
+    }))
+
+    dispatch(setRepositories(cleanedRepos))
+  },[repos,dispatch])
+
   useEffect(() => {
     const filtered = repositories.filter(
       (repo) =>
-        repo.name.toLowerCase().includes(searchString.toLowerCase()) ||
-        repo.description.toLowerCase().includes(searchString.toLowerCase()),
+        `${repo.name} ${repo.description}`
+        .toLowerCase()
+        .includes(searchString.toLowerCase())
     );
     setFilteredRepos(filtered);
   }, [repositories, searchString]);

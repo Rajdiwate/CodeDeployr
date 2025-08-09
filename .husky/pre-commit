@@ -3,7 +3,6 @@
 
 echo "🐶 Husky pre-commit hook triggered."
 echo "🔍 Running lint to check code quality..."
-
 pnpm run lint 
 
 echo "🧪 Running type check"

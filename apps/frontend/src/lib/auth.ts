@@ -1,4 +1,4 @@
-import { client as prisma } from "@deployer/db";
+import { client as prisma } from "@deployr/db";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { Session, User, SessionStrategy, Account, Profile } from "next-auth";
 import { JWT } from "next-auth/jwt";

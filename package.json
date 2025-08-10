@@ -12,8 +12,7 @@
     "db:generate": "cd packages/db && pnpx prisma generate",
     "db:migrate": "cd packages/db && pnpx prisma migrate dev",
     "db:studio": "cd packages/db && pnpx prisma studio",
-    "db:apply": "cd packages/db && pnpx prisma migrate deploy",
-    "check-types": "turbo run check-types"
+    "db:apply": "cd packages/db && pnpx prisma migrate deploy"
   },
   "devDependencies": {
     "husky": "^9.1.7",

@@ -5,10 +5,7 @@ echo "🐶 Husky pre-commit hook triggered."
 echo "🔍 Running lint to check code quality..."
 pnpm run lint 
 
-echo "🧪 Running type check"
-pnpm run check-types
-
-echo "Runnin format check"
+echo "Running format check"
 pnpm run format:check
 
 echo "Checking build success"

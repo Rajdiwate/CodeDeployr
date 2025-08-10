@@ -1,0 +1,3 @@
+{
+    "extends" : "@deployr/typescript-config/base",
+}

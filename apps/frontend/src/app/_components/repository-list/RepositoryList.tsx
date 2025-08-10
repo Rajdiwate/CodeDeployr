@@ -39,7 +39,7 @@ export function RepositoryList({ repos }: { repos: Repo[] }) {
       try {
         setFetchingFramework((prev) => ({ ...prev, [repo.id]: true }));
         const { data } = await axios.get(
-          `http://localhost:3001/detect-framework?repoUrl=${repo.clone_url}`,
+          `http://localhost:3001/detect-framework?cloneUrl=${repo.clone_url}&repoId=${repo.id}`,
         );
         console.log(data);
         setFetchingFramework((prev) => ({ ...prev, [repo.id]: false }));

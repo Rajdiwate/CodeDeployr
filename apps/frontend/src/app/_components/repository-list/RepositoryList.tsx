@@ -7,8 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Repo } from "@/lib/slices/repoSlice";
 import { setRepositories } from "@/lib/slices/repoSlice";
 import { useAppSelector, useAppDispatch } from "@/hooks/redux";
-import { useCallback, useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 
 const languageColors: Record<string, string> = {
   TypeScript: "bg-blue-400/70",
@@ -29,25 +28,25 @@ export function RepositoryList({ repos }: { repos: Repo[] }) {
   //   "456": false,
   //   "789": false
   // }
-  const [fetchingFramework, setFetchingFramework] = useState<{
-    [repoId: string]: boolean;
-  }>(repositories.reduce((acc, repo) => ({ ...acc, [repo.id]: false }), {}));
+  // const [fetchingFramework, setFetchingFramework] = useState<{
+  //   [repoId: string]: boolean;
+  // }>(repositories.reduce((acc, repo) => ({ ...acc, [repo.id]: false }), {}));
 
   // if the repos exist, send the req to get the frameworks (will be async opt)
-  const getFrameworks = useCallback(async () => {
-    for (const repo of repositories) {
-      try {
-        setFetchingFramework((prev) => ({ ...prev, [repo.id]: true }));
-        const { data } = await axios.get(
-          `http://localhost:3001/detect-framework?cloneUrl=${repo.clone_url}&repoId=${repo.id}`,
-        );
-        console.log(data);
-        setFetchingFramework((prev) => ({ ...prev, [repo.id]: false }));
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  }, [repositories]);
+  // const getFrameworks = useCallback(async () => {
+  //   for (const repo of repositories) {
+  //     try {
+  //       setFetchingFramework((prev) => ({ ...prev, [repo.id]: true }));
+  //       const { data } = await axios.get(
+  //         `http://localhost:3001/detect-framework?cloneUrl=${repo.clone_url}&repoId=${repo.id}`,
+  //       );
+  //       console.log(data);
+  //       setFetchingFramework((prev) => ({ ...prev, [repo.id]: false }));
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   }
+  // }, [repositories]);
 
   useEffect(() => {
     if (repositories.length !== repos.length) {
@@ -64,14 +63,14 @@ export function RepositoryList({ repos }: { repos: Repo[] }) {
     setFilteredRepos(filtered);
   }, [repositories, searchString]);
 
-  useEffect(() => {
-    if (repositories.length) getFrameworks();
-  }, [getFrameworks, repositories]);
+  // useEffect(() => {
+  //   if (repositories.length) getFrameworks();
+  // }, [getFrameworks, repositories]);
 
   //remove this later
-  if (fetchingFramework) {
-    console.log("object");
-  }
+  // if (fetchingFramework) {
+  //   console.log("object");
+  // }
 
   return (
     <div className="space-y-4">

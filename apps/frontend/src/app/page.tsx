@@ -5,21 +5,44 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Header } from "./_components/header/Header";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import { Repo } from "@/lib/slices/repoSlice";
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
+  let repos: Repo[] = [];
 
-  if (!session || !session.user || !session.user.id) {
+  if (!session || !session.user || !session.user.id || !session.accessToken) {
     redirect("/api/auth/signin");
   }
 
-  const token = session.accessToken;
-  const { data: repos } = await axios.get("https://api.github.com/user/repos", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  try {
+    const { data } = await axios.get("https://api.github.com/user/repos", {
+      headers: {
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+    });
+
+    const cleanedRepos: Repo[] = data.map((repo: Repo) => ({
+      id: repo.id,
+      name: repo.name,
+      description: repo.description,
+      language: repo.language,
+      stargazers_count: repo.stargazers_count,
+      forks: repo.forks,
+      updated_at: repo.updated_at,
+      private: repo.private,
+      default_branch: repo.default_branch,
+      clone_url: repo.clone_url,
+      html_url: repo.html_url,
+    }));
+
+    repos = cleanedRepos;
+  } catch (error) {
+    if (error instanceof AxiosError)
+      console.log("error getting repos", error.response?.data);
+    // logout the user if there is an error
+  }
 
   return (
     <div className="min-h-screen bg-black ">

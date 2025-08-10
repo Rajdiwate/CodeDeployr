@@ -102,6 +102,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      follow-redirects:
+        specifier: ^1.15.11
+        version: 1.15.11
       lucide-react:
         specifier: ^0.536.0
         version: 0.536.0(react@19.1.0)

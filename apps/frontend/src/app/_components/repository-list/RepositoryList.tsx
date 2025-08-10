@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Repo } from "@/lib/slices/repoSlice";
 import { setRepositories } from "@/lib/slices/repoSlice";
 import { useAppSelector, useAppDispatch } from "@/hooks/redux";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import axios from "axios";
 
 const languageColors: Record<string, string> = {
   TypeScript: "bg-blue-400/70",
@@ -19,29 +20,38 @@ const languageColors: Record<string, string> = {
 };
 
 export function RepositoryList({ repos }: { repos: Repo[] }) {
-  console.log(repos);
   const dispatch = useAppDispatch();
   const { repositories, searchString } = useAppSelector((state) => state.repo);
+  const [filteredRepos, setFilteredRepos] = useState<Repo[]>([]);
 
-  const [filteredRepos, setFilteredRepos] = useState(repositories);
+  //{
+  //   "123": false,
+  //   "456": false,
+  //   "789": false
+  // }
+  const [fetchingFramework, setFetchingFramework] = useState<{
+    [repoId: string]: boolean;
+  }>(repositories.reduce((acc, repo) => ({ ...acc, [repo.id]: false }), {}));
+
+  // if the repos exist, send the req to get the frameworks (will be async opt)
+  const getFrameworks = useCallback(async () => {
+    for (const repo of repositories) {
+      try {
+        setFetchingFramework((prev) => ({ ...prev, [repo.id]: true }));
+        const { data } = await axios.get(
+          `http://localhost:3001/detect-framework?repoUrl=${repo.clone_url}`,
+        );
+        console.log(data);
+        setFetchingFramework((prev) => ({ ...prev, [repo.id]: false }));
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }, [repositories]);
 
   useEffect(() => {
     if (repositories.length !== repos.length) {
-      const cleanedRepos: Repo[] = repos.map((repo) => ({
-        id: repo.id,
-        name: repo.name,
-        description: repo.description,
-        language: repo.language,
-        stargazers_count: repo.stargazers_count,
-        forks: repo.forks,
-        updated_at: repo.updated_at,
-        private: repo.private,
-        default_branch: repo.default_branch,
-        clone_url: repo.clone_url,
-        html_url: repo.html_url,
-      }));
-
-      dispatch(setRepositories(cleanedRepos));
+      dispatch(setRepositories(repos));
     }
   }, [repos, dispatch, repositories]);
 
@@ -53,6 +63,15 @@ export function RepositoryList({ repos }: { repos: Repo[] }) {
     );
     setFilteredRepos(filtered);
   }, [repositories, searchString]);
+
+  useEffect(() => {
+    if (repositories.length) getFrameworks();
+  }, [getFrameworks, repositories]);
+
+  //remove this later
+  if (fetchingFramework) {
+    console.log("object");
+  }
 
   return (
     <div className="space-y-4">

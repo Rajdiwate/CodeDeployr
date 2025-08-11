@@ -8,6 +8,7 @@ import { Repo } from "@/lib/slices/repoSlice";
 import { setRepositories } from "@/lib/slices/repoSlice";
 import { useAppSelector, useAppDispatch } from "@/hooks/redux";
 import { useEffect, useState } from "react";
+import { signOut } from "next-auth/react";
 
 const languageColors: Record<string, string> = {
   TypeScript: "bg-blue-400/70",
@@ -23,32 +24,10 @@ export function RepositoryList({ repos }: { repos: Repo[] }) {
   const { repositories, searchString } = useAppSelector((state) => state.repo);
   const [filteredRepos, setFilteredRepos] = useState<Repo[]>([]);
 
-  //{
-  //   "123": false,
-  //   "456": false,
-  //   "789": false
-  // }
-  // const [fetchingFramework, setFetchingFramework] = useState<{
-  //   [repoId: string]: boolean;
-  // }>(repositories.reduce((acc, repo) => ({ ...acc, [repo.id]: false }), {}));
-
-  // if the repos exist, send the req to get the frameworks (will be async opt)
-  // const getFrameworks = useCallback(async () => {
-  //   for (const repo of repositories) {
-  //     try {
-  //       setFetchingFramework((prev) => ({ ...prev, [repo.id]: true }));
-  //       const { data } = await axios.get(
-  //         `http://localhost:3001/detect-framework?cloneUrl=${repo.clone_url}&repoId=${repo.id}`,
-  //       );
-  //       console.log(data);
-  //       setFetchingFramework((prev) => ({ ...prev, [repo.id]: false }));
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  // }, [repositories]);
-
   useEffect(() => {
+    if (!repos.length) {
+      signOut();
+    }
     if (repositories.length !== repos.length) {
       dispatch(setRepositories(repos));
     }
@@ -62,15 +41,6 @@ export function RepositoryList({ repos }: { repos: Repo[] }) {
     );
     setFilteredRepos(filtered);
   }, [repositories, searchString]);
-
-  // useEffect(() => {
-  //   if (repositories.length) getFrameworks();
-  // }, [getFrameworks, repositories]);
-
-  //remove this later
-  // if (fetchingFramework) {
-  //   console.log("object");
-  // }
 
   return (
     <div className="space-y-4">

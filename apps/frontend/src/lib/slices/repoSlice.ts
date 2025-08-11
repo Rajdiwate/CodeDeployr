@@ -12,6 +12,7 @@ export type Repo = {
   default_branch: string;
   clone_url: string;
   html_url: string;
+  full_name: string;
 };
 
 const initialState: { repositories: Repo[]; searchString: string } = {

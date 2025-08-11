@@ -41,7 +41,7 @@ export function RepositoryCard({ repo, languageColors }: IRepositoryProps) {
               {repo.description}
             </CardDescription>
           </div>
-          <HandleImportButton />
+          <HandleImportButton repo={repo} />
         </div>
       </CardHeader>
       <CardContent className="pt-0">

@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 interface EnvVar {
   id: string;
@@ -42,6 +43,7 @@ const frameworks = [
   {
     id: "vite-react",
     name: "Vite + React",
+    framework: "REACT",
     description: "Fast build tool with React",
     buildCommand: "npm run build",
     startCommand: "npm run start",
@@ -49,6 +51,7 @@ const frameworks = [
   },
   {
     id: "create-react-app",
+    framework: "REACT",
     name: "Create React App",
     description: "Traditional React setup",
     buildCommand: "npm run build",
@@ -58,6 +61,7 @@ const frameworks = [
   {
     id: "static",
     name: "Static Files",
+    framework: "STATIC_HTML",
     description: "HTML, CSS, JS files",
     buildCommand: "",
     startCommand: "",
@@ -69,6 +73,7 @@ const branches = ["main", "master", "develop", "staging"];
 
 function NewProjectPage() {
   const searchParams = useSearchParams();
+  const { data } = useSession();
   const cloneUrl = searchParams.get("cloneUrl");
   const repoId = searchParams.get("repoId");
   const httpUrl = searchParams.get("repoUrl");
@@ -78,6 +83,7 @@ function NewProjectPage() {
     searchParams.get("repoName") || "",
   );
   const [selectedFramework, setSelectedFramework] = useState("");
+  const [projectFramework, setProjectFramework] = useState("");
   const [rootDirectory, setRootDirectory] = useState("./");
   const [selectedBranch, setSelectedBranch] = useState(
     searchParams.get("defaultBranch") || branches[0],
@@ -93,6 +99,7 @@ function NewProjectPage() {
     setSelectedFramework(frameworkId);
     const framework = frameworks.find((f) => f.id === frameworkId);
     if (framework) {
+      setProjectFramework(framework.framework);
       setBuildCommand(framework.buildCommand);
       setStartCommand(framework.startCommand);
       setOutputDirectory(framework.outputDirectory);
@@ -131,6 +138,7 @@ function NewProjectPage() {
     await axios.post(
       `${process.env.CLONER_BASE_URL || "http://localhost:3001"}/project/create`,
       {
+        userId: data?.user.id,
         githubRepoUrl: cloneUrl,
         name: projectName,
         githubRepoName: searchParams.get("fullName") || projectName,
@@ -138,7 +146,7 @@ function NewProjectPage() {
         buildCommand: buildCommand,
         startCommand: startCommand,
         envVariables: envVars,
-        selectedFramework,
+        framework: projectFramework,
         rootDirectory,
         subdomain: projectName.toLowerCase().replace(/[^a-zA-Z0-9]/g, "-"),
       },

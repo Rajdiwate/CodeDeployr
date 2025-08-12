@@ -70,7 +70,7 @@ model Project {
   description String?
 
   // GitHub Integration
-  githubRepoUrl   String
+  githubRepoUrl   String  @unique
   githubRepoName  String // e.g., "username/repo-name"
   githubBranch    String  @default("main")
   githubWebhookId String? // GitHub webhook ID for auto-deploy
@@ -84,7 +84,7 @@ model Project {
   startCommand    String? // For backend projects
 
   // Environment Variables
-  envVariables EnvVariable[]
+  envVariables EnvVariable[] 
 
   // Deployment Configuration
   subdomain    String  @unique // e.g., "my-app" for my-app.codedeployr.io

@@ -5,6 +5,7 @@ import git from "simple-git";
 import AdmZip from "adm-zip";
 import path from "path";
 import fs from "fs";
+import { uploadZipToS3 } from "@deployr/aws";
 
 export const createProject = asyncHandler(async (req, res) => {
   // Constants
@@ -92,8 +93,6 @@ export const createProject = asyncHandler(async (req, res) => {
     CLONE_DEPTH,
   ]);
 
-  console.log("Directory:", __dirname);
-
   // Handle file processing based on project type
   if (project.projectType === PROJECT_TYPE_FRONTEND) {
     // Create zip directory if it doesn't exist
@@ -107,6 +106,9 @@ export const createProject = asyncHandler(async (req, res) => {
     await zip.writeZipPromise(zipFilePath);
 
     console.log(`Zip file created at: ${zipFilePath}`);
+
+    const publicUrl = await uploadZipToS3(zipFilePath, projectId);
+    console.log("uploaded to s3", publicUrl);
   }
 
   if (project.projectType === PROJECT_TYPE_STATIC) {

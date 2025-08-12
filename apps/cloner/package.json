@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@deployr/aws": "workspace:*",
     "@deployr/db": "workspace:*",
     "@deployr/schemas": "workspace:*",
     "@deployr/typescript-config": "workspace:*",
@@ -21,6 +22,7 @@
     "adm-zip": "^0.5.16",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "redis": "^5.8.0",
     "simple-git": "^3.28.0",

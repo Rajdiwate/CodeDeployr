@@ -3,6 +3,9 @@ import express from "express";
 import { createClient } from "redis";
 import cors from "cors";
 import { errorMiddleware } from "./middleware/error";
+import { config } from "dotenv";
+
+config();
 
 export const client: ReturnType<typeof createClient> = createClient({
   url: "redis://localhost:6379",

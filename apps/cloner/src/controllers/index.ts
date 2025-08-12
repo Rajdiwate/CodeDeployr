@@ -5,7 +5,8 @@ import git from "simple-git";
 import AdmZip from "adm-zip";
 import path from "path";
 import fs from "fs";
-import { uploadZipToS3 } from "@deployr/aws";
+import { uploadFilesFromLocalDirectoryToS3, uploadZipToS3 } from "@deployr/aws";
+import { rm } from "fs/promises";
 
 export const createProject = asyncHandler(async (req, res) => {
   // Constants
@@ -109,12 +110,36 @@ export const createProject = asyncHandler(async (req, res) => {
 
     const publicUrl = await uploadZipToS3(zipFilePath, projectId);
     console.log("uploaded to s3", publicUrl);
+
+    // Add the public URL to the project
+    await client.project.update({
+      where: { id: projectId },
+      data: {
+        sourceCodePath: publicUrl,
+      },
+    });
   }
 
   if (project.projectType === PROJECT_TYPE_STATIC) {
     // TODO: Upload static files directly to S3
     console.log("Processing static files for direct S3 upload");
+    const folderPath = await uploadFilesFromLocalDirectoryToS3(
+      clonedRepoPath,
+      projectId,
+    );
+
+    await client.project.update({
+      where: { id: projectId },
+      data: {
+        buildArtifactsPath: folderPath,
+      },
+    });
   }
+
+  // Delete cloned repo and zip file if exists
+  if (fs.existsSync(clonedRepoPath))
+    await rm(clonedRepoPath, { recursive: true });
+  if (fs.existsSync(zipFilePath)) await rm(zipFilePath);
 
   // TODO: Add task to queue for build and deployment
 

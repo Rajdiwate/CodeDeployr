@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/controllers/index.ts","./src/middleware/error.ts","./src/routes/index.ts","./src/util/apperror.ts","./src/util/asynchandler.ts"],"version":"5.9.2"}
+{"root":["./src/clonehandler.ts","./src/cloner.ts","./src/index.ts","./src/controllers/index.ts","./src/middleware/error.ts","./src/routes/index.ts","./src/util/apperror.ts","./src/util/asynchandler.ts"],"version":"5.9.2"}

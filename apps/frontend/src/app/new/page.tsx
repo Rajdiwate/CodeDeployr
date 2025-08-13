@@ -136,7 +136,7 @@ function NewProjectPage() {
     // Simulate deployment process
 
     await axios.post(
-      `${process.env.CLONER_BASE_URL || "http://localhost:3001"}/project/create`,
+      `/api/create-project`,
       {
         userId: data?.user.id,
         githubRepoUrl: cloneUrl,

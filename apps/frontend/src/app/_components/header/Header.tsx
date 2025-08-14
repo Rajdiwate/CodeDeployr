@@ -1,14 +1,46 @@
-import { authOptions } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Rocket } from "lucide-react";
-import { getServerSession } from "next-auth";
+import { MyProjectsButton } from "./MyProjectsButton";
+import { client, Prisma } from "@deployr/db";
 
-export async function Header() {
-  const session = await getServerSession(authOptions);
-  const user = session?.user;
+type TUser = {
+  id: unknown;
+  name?: string | null | undefined;
+  email?: string | null | undefined;
+  image?: string | null | undefined;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const projectWithDeployments = Prisma.validator<Prisma.ProjectFindFirstArgs>()({
+  select: {
+    id: true,
+    name: true,
+    framework: true,
+    deployments: {
+      select: {
+        id: true,
+        status: true,
+        updatedAt: true,
+        deploymentUrl: true,
+      },
+    },
+  },
+});
+
+export type TProject = Prisma.ProjectGetPayload<typeof projectWithDeployments>;
+
+export async function Header({ user }: { user: TUser }) {
+  const projects: TProject[] = await client.project.findMany({
+    where: {
+      userId: user.id as string,
+    },
+    include: {
+      deployments: true,
+    },
+  });
 
   return (
-    <header className="border-b border-gray-800/50 bg-gray-950/80 backdrop-blur-sm">
+    <header className="border-b border-gray-800/50 bg-gray-950/80 backdrop-blur-sm sticky top-0">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -20,7 +52,11 @@ export async function Header() {
               <p className="text-sm text-gray-500">Deploy with confidence</p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-8">
+            <div className="relative">
+              <MyProjectsButton projects={projects} />
+            </div>
+
             {user && (
               <>
                 <Avatar className="w-10 h-10 rounded-2xl overflow-hidden">

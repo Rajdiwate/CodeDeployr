@@ -23,9 +23,12 @@ export function SearchRepo() {
   }
 
   return (
-    <Card className="mb-8 bg-gray-950/50 border-gray-800/50 shadow-2xl">
+    <Card
+      className="mb-8 bg-gray-950/50 border-gray-800/50 shadow-2xl "
+      style={{ zIndex: 0 }}
+    >
       <CardContent className="p-6">
-        <div className="relative">
+        <div className="relative " style={{ zIndex: 0 }}>
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
           <Input
             placeholder="Search repositories..."

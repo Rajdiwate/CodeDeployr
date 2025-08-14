@@ -46,12 +46,12 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black ">
+    <div className="min-h-screen bg-black z-10">
       {/* Header */}
-      <Header />
+      <Header user={session.user} />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 z-20">
         <div className="max-w-6xl mx-auto">
           {/* Import Form Header */}
           <div className="text-center mb-8">

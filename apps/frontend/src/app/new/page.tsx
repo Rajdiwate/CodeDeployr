@@ -32,6 +32,7 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 interface EnvVar {
   id: string;
@@ -157,10 +158,11 @@ function NewProjectPage() {
       },
     );
 
+    toast.success("Deployment initiated successfully!");
+
     setTimeout(() => {
-      setIsDeploying(false);
-      alert("Project deployed successfully!");
-    }, 3000);
+      router.push("/");
+    }, 1000);
   };
 
   const selectedFrameworkData = frameworks.find(

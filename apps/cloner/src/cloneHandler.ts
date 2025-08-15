@@ -5,6 +5,7 @@ import git from "simple-git";
 import path from "path";
 import fs from "fs";
 import { rm } from "fs/promises";
+import { producer } from "./cloner";
 
 const CLONED_REPO_DIR = "cloned-repo";
 const ZIP_DIR = "zip";
@@ -15,7 +16,6 @@ const PROJECT_TYPE_FRONTEND = "FRONTEND";
 type ProjectType = Prisma.ProjectGetPayload<Prisma.ProjectCreateArgs>;
 
 export async function handler(project: ProjectType) {
-  console.log(project);
   if (!project || !project.id) return;
 
   // Set up file paths
@@ -78,5 +78,11 @@ export async function handler(project: ProjectType) {
     await rm(clonedRepoPath, { recursive: true });
   if (fs.existsSync(zipFilePath)) await rm(zipFilePath);
 
-  // TODO: Add task to queue for build and deployment
+  //Add task to queue for build and deployment
+  await producer.send({
+    topic: process.env.KAFKA_DEPLOY_TOPIC || "deploy-request",
+    messages: [
+      { value: JSON.stringify({ projectId }), key: projectId.toString() },
+    ],
+  });
 }

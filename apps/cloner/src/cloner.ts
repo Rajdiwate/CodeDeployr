@@ -12,28 +12,29 @@ const kafka = new Kafka({
 const consumer = kafka.consumer({
   groupId: process.env.KAFKA_CONSUMER_GROUP_ID || "cloner",
 });
+export const producer = kafka.producer({ allowAutoTopicCreation: true });
 
 const run = async () => {
   await consumer.connect();
+  await producer.connect();
+  console.log("Consumer and Producer Connected");
   await consumer.subscribe({
     topic: process.env.KAFKA_CLONE_TOPIC || "clone-request",
   });
   await consumer.run({
-    eachMessage: async ({ topic, partition, message }) => {
+    eachMessage: async ({ message }) => {
       if (!message.value) return;
 
-      await handler(JSON.parse(message.value.toString()));
-      console.log({
-        topic,
-        partition,
-        offset: message.offset,
-        value: message?.value?.toString(),
-      });
+      try {
+        await handler(JSON.parse(message.value.toString()));
+      } catch (error) {
+        // set the status of the deployment as failed
+        console.error(error);
+      }
     },
   });
 };
 
 run().then(() => {
-  console.log("consumer connected");
-  console.log("consuming topic", process.env.KAFKA_CLONE_TOPIC);
+  console.log("Cloner Started");
 });

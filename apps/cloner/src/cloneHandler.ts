@@ -73,11 +73,6 @@ export async function handler(project: ProjectType) {
     });
   }
 
-  // Delete cloned repo and zip file if exists
-  if (fs.existsSync(clonedRepoPath))
-    await rm(clonedRepoPath, { recursive: true });
-  if (fs.existsSync(zipFilePath)) await rm(zipFilePath);
-
   //Add task to queue for build and deployment
   await producer.send({
     topic: process.env.KAFKA_DEPLOY_TOPIC || "deploy-request",
@@ -85,4 +80,9 @@ export async function handler(project: ProjectType) {
       { value: JSON.stringify({ projectId }), key: projectId.toString() },
     ],
   });
+
+  // Delete cloned repo and zip file if exists
+  if (fs.existsSync(clonedRepoPath))
+    await rm(clonedRepoPath, { recursive: true });
+  if (fs.existsSync(zipFilePath)) await rm(zipFilePath);
 }

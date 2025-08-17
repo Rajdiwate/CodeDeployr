@@ -2,6 +2,10 @@ import { config } from "dotenv";
 import { Kafka } from "kafkajs";
 import { createDeployment, getProject } from "./utils/dbOpt";
 import { client } from "@deployr/db";
+import { getFileFromS3 } from "@deployr/aws";
+import AdmZip from "adm-zip";
+import path from "path";
+import { rm } from "fs/promises";
 
 config();
 
@@ -50,6 +54,28 @@ const run = async () => {
             deploymentUrl: publicUrl,
           },
         });
+      }
+
+      if (project?.framework === "REACT") {
+        if (!project.sourceCodePath) {
+          console.log("no zip path provided");
+          return;
+        }
+
+        try {
+          // Create local file path: __dirname + key
+          const localFilePath = path.join(__dirname, project.sourceCodePath);
+          // get zip file from s3
+          await getFileFromS3(project.sourceCodePath, localFilePath);
+          // unzip to "projectId" folder
+          const zip = new AdmZip(
+            path.join(__dirname, `${project.sourceCodePath}`),
+          );
+          zip.extractAllTo(path.join(__dirname, `${projectId}`), true);
+          rm(path.join(__dirname, `${project.sourceCodePath}`));
+        } catch (error) {
+          console.log("error while getting file from s3", error);
+        }
       }
     },
   });

@@ -1,6 +1,12 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { createWriteStream, existsSync, mkdirSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
+import { pipeline } from "stream/promises";
 
 // Content-Type mapping for common web files
 const contentTypeMap: { [ext: string]: string } = {
@@ -94,4 +100,33 @@ export const uploadFilesFromLocalDirectoryToS3 = async (
   await traverseAndUpload(localDirPath, "");
 
   return `${process.env.S3_ARTIFACT_PATH_PREFIX ? process.env.S3_ARTIFACT_PATH_PREFIX + "/" : ""}${folderPrefix}`; // folder where the static files are sotred
+};
+
+export const getFileFromS3 = async (key: string, localFilePath: string) => {
+  const s3Client = init();
+  const command = new GetObjectCommand({
+    Bucket: process.env.S3_BUCKET,
+    Key: key,
+  });
+  const response = await s3Client.send(command);
+
+  const localDir = path.dirname(localFilePath);
+
+  // Create directory structure recursively if it doesn't exist
+  if (!existsSync(localDir)) {
+    mkdirSync(localDir, { recursive: true });
+  }
+
+  // Stream the S3 object to local file
+  const writeStream = createWriteStream(localFilePath);
+
+  try {
+    // Use pipeline for better error handling and memory efficiency
+    await pipeline(response.Body as NodeJS.ReadableStream, writeStream);
+    console.log(`File downloaded and saved to: ${localFilePath}`);
+    return localFilePath;
+  } catch (error) {
+    console.error("Error downloading file:", error);
+    throw error;
+  }
 };

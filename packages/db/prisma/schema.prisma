@@ -127,8 +127,8 @@ model Deployment {
   id String @id @default(cuid())
 
   // Deployment Metadata
-  version       String // e.g., "v1.2.3" or commit hash
-  commitHash    String
+  version       Int @default(autoincrement()) // e.g., "v1.2.3" or commit hash
+  commitHash    String?
   commitMessage String?
   branch        String
 
@@ -180,7 +180,6 @@ model Deployment {
   // Metadata
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  S3Object  S3Object[]
 
   @@index([projectId])
   @@index([status])
@@ -258,7 +257,6 @@ model S3Object {
   projectId    String?
   project      Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
   deploymentId String?
-  deployment   Deployment? @relation(fields: [deploymentId], references: [id], onDelete: SetNull)
 
   // Metadata
   createdAt DateTime @default(now())

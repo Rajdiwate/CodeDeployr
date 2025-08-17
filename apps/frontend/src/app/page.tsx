@@ -22,7 +22,7 @@ export default async function HomePage() {
         Authorization: `Bearer ${session.accessToken}`,
       },
     });
-    // console.log(data);
+    console.log(data);
     const cleanedRepos: Repo[] = data.map((repo: Repo) => ({
       id: repo.id,
       name: repo.name,

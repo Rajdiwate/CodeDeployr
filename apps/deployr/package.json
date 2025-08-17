@@ -20,7 +20,8 @@
     "@deployr/typescript-config": "workspace:*",
     "adm-zip": "^0.5.16",
     "dotenv": "^17.2.1",
-    "kafkajs": "^2.2.4"
+    "kafkajs": "^2.2.4",
+    "zod": "^4.0.17"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",

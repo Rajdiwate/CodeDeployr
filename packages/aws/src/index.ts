@@ -2,6 +2,28 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import fs from "fs/promises";
 import path from "path";
 
+// Content-Type mapping for common web files
+const contentTypeMap: { [ext: string]: string } = {
+  ".html": "text/html",
+  ".css": "text/css",
+  ".js": "application/javascript",
+  ".json": "application/json",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+};
+
+function getContentType(filename: string) {
+  const ext = path.extname(filename).toLowerCase();
+  return contentTypeMap[ext] || "application/octet-stream";
+}
+
 const init = () => {
   const s3Client = new S3Client({
     region: process.env.AWS_REGION || "ap-south-1",
@@ -59,8 +81,9 @@ export const uploadFilesFromLocalDirectoryToS3 = async (
         await s3Client.send(
           new PutObjectCommand({
             Bucket: process.env.S3_BUCKET,
-            Key: `${process.env.S3_ARTIFACT_PATH_PREFIX ? process.env.S3_ARTIFACT_PATH_PREFIX + "/" : ""}${folderPrefix} /${s3Key}`,
+            Key: `${process.env.S3_ARTIFACT_PATH_PREFIX ? process.env.S3_ARTIFACT_PATH_PREFIX + "/" : ""}${folderPrefix}/${s3Key}`,
             Body: fileBuffer,
+            ContentType: getContentType(entry.name),
           }),
         );
         console.log(`Uploaded: ${s3Key}`);

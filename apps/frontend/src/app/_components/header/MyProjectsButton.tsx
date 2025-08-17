@@ -140,17 +140,18 @@ export function MyProjectsButton({ projects }: { projects: TProject[] }) {
                               variant="ghost"
                               size="sm"
                               className="h-6 px-2 text-gray-400 hover:text-white hover:bg-gray-800/50"
-                              onClick={() =>
-                                window.open(
-                                  project.deployments[
-                                    project.deployments?.length - 1
-                                  ]?.deploymentUrl as string,
-                                  "_blank",
-                                )
-                              }
                             >
                               <Globe className="w-3 h-3 mr-1" />
-                              Visit
+                              <a
+                                href={
+                                  project.deployments[
+                                    project.deployments?.length - 1
+                                  ]?.deploymentUrl as string
+                                }
+                                target="_blank"
+                              >
+                                Visit
+                              </a>
                             </Button>
                           )}
                         </div>

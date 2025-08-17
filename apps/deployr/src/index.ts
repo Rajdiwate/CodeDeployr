@@ -1,5 +1,7 @@
 import { config } from "dotenv";
 import { Kafka } from "kafkajs";
+import { createDeployment, getProject } from "./utils/dbOpt";
+import { client } from "@deployr/db";
 
 config();
 
@@ -21,6 +23,34 @@ const run = async () => {
     eachMessage: async ({ message }) => {
       if (!message.value) return;
       console.log(JSON.parse(message.value.toString()));
+      const projectId = JSON.parse(message.value.toString())
+        .projectId as string;
+      // get the project from db
+      const project = await getProject(projectId);
+      // create a deployment
+      const deployment = await createDeployment({
+        branch: project?.githubBranch as string,
+        projectId,
+      });
+      if (!deployment) {
+        console.log("failed to create deployment");
+        // should try again after some time. Another service should check which projects has not been deployed and try to deploy them
+        return;
+      }
+      // check if the project type is static or frontend
+      // if the project type is static  ,then take the build artifact path , search for it on s3 , get the path of index.html from there , create url and return
+      if (project?.framework === "STATIC_HTML") {
+        const publicUrl = `http://${process.env.S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${project.buildArtifactsPath}/index.html`;
+        console.log(publicUrl);
+        // update the project with the deployment url and deployment status to deployed
+        await client.deployment.update({
+          where: { id: deployment.id },
+          data: {
+            status: "DEPLOYED",
+            deploymentUrl: publicUrl,
+          },
+        });
+      }
     },
   });
 };

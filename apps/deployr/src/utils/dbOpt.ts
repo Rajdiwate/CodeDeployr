@@ -6,7 +6,10 @@ type createDeploymentType = z.infer<typeof createDeploymentSchema>;
 
 export const getProject = async (id: string) => {
   try {
-    const project = await client.project.findUnique({ where: { id } });
+    const project = await client.project.findUnique({
+      where: { id },
+      include: { envVariables: true },
+    });
     return project;
   } catch (error) {
     console.log("error getting project", error);

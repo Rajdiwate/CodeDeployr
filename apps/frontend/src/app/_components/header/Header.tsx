@@ -35,7 +35,11 @@ export async function Header({ user }: { user: TUser }) {
       userId: user.id as string,
     },
     include: {
-      deployments: true,
+      deployments: {
+        orderBy: {
+          updatedAt: "desc",
+        },
+      },
     },
   });
 

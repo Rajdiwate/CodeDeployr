@@ -7,7 +7,7 @@ import AdmZip from "adm-zip";
 import path from "path";
 import { rm, rmdir } from "fs/promises";
 import { execSync } from "child_process";
-import { existsSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 
 config();
 
@@ -93,6 +93,21 @@ const run = async () => {
           //delete the zipped file from local
           rm(path.join(__dirname, `${project.sourceCodePath}`));
           // TODO ===> update the deployment status with building
+
+          //Add homepage : "build/deploymentId" to package.json
+          const packageJson = JSON.parse(
+            readFileSync(
+              path.join(__dirname, `${projectId}/package.json`),
+              "utf-8",
+            ),
+          );
+          // Update homepage
+          packageJson.homepage = `/build/${deployment.id}`;
+          writeFileSync(
+            path.join(__dirname, `${projectId}/package.json`),
+            JSON.stringify(packageJson, null, 2),
+          );
+
           //run the install and build in the docker image with the volume mount of the ${projectId} folder
           const CMD = `docker run --rm -v ${path.join(
             __dirname,
@@ -113,7 +128,7 @@ const run = async () => {
           // for Vite
           else if (existsSync(path.join(__dirname, `${projectId}/dist`))) {
             artifictPath = await uploadFilesFromLocalDirectoryToS3(
-              path.join(__dirname, `${projectId}/dist`),
+              path.join(__dirname, `${projectId}/build`),
               projectId,
             );
           }
